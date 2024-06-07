@@ -1,0 +1,7 @@
+service_name: "order"
+env: "local"
+storage_path: "postgres://postgres:postgres@db:5432/wb_db?sslmode=disable"
+redis_path: "redis://redis:6379"
+http_server: 
+  port: 8090
+  timeout: 5s
