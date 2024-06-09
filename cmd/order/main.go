@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"order/internal/app"
 	"order/internal/config"
 	"order/pkg/logger"
 	"os"
@@ -23,14 +24,17 @@ func run() error {
 		return err
 	}
 
-	_ = cfg
-
 	log, err := logger.SetupLogger(cfg)
 	if err != nil {
 		return err
 	}
 
-	_ = log
+	orderApp := app.NewApp(log, cfg.HTTPServer.Port)
+
+	if err := orderApp.Run(); err != nil {
+		log.Error("Failed to run app:", logger.Err(err))
+		return err
+	}
 
 	return nil
 }
