@@ -29,7 +29,7 @@ func run() error {
 		return err
 	}
 
-	orderApp := app.NewApp(log, cfg.HTTPServer.Port)
+	orderApp := app.NewApp(log, cfg.HTTPServer.Port, cfg.StoragePath, cfg.RedisPath)
 
 	if err := orderApp.Run(); err != nil {
 		log.Error("Failed to run app:", logger.Err(err))
