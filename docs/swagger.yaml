@@ -69,7 +69,6 @@ definitions:
     - order_uid
     - payment
     - shardkey
-    - sm_id
     - track_number
     type: object
   model.OrderItem:
@@ -98,15 +97,9 @@ definitions:
         type: string
     required:
     - brand
-    - chrt_id
     - name
-    - nm_id
-    - price
     - rid
-    - sale
     - size
-    - status
-    - total_price
     - track_number
     type: object
   model.Payment:
@@ -132,13 +125,8 @@ definitions:
       transaction:
         type: string
     required:
-    - amount
     - bank
     - currency
-    - custom_fee
-    - delivery_cost
-    - goods_total
-    - payment_dt
     - provider
     - transaction
     type: object
@@ -196,15 +184,15 @@ paths:
       summary: Create a new order
       tags:
       - order
-  /order/{uuid}:
+  /order/{uid}:
     get:
       consumes:
       - application/json
-      description: Get details of an order by its UUID
+      description: Get details of an order by its UID
       parameters:
-      - description: Order UUID
+      - description: Order UID
         in: path
-        name: uuid
+        name: uid
         required: true
         type: string
       produces:
@@ -229,7 +217,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Get an order by UUID
+      summary: Get an order by UID
       tags:
       - order
 securityDefinitions:

@@ -20,6 +20,6 @@ func SetupFiber() *fiber.App {
 
 func SetupRoutes(app *fiber.App, orderCtrl *OrderHandlers) {
 	app.Get("/swagger/*", swagger.HandlerDefault)
-	app.Get("api/v1/order:uuid", orderCtrl.GetOrder)
+	app.Get("api/v1/order/:uid", orderCtrl.GetOrder)
 	app.Post("api/v1/order", orderCtrl.CreateOrder)
 }

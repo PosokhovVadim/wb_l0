@@ -7,7 +7,6 @@ import (
 	"order/internal/model"
 	"order/internal/storage"
 
-	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -25,7 +24,7 @@ func NewPostgresStorage(postgresPath string) (*PostgresStorage, error) {
 	}, nil
 }
 
-func (s *PostgresStorage) CreateOrder(ctx context.Context, order_uid uuid.UUID, order model.Order) error {
+func (s *PostgresStorage) CreateOrder(ctx context.Context, order_uid string, order model.Order) error {
 	query := `
 		INSERT INTO orders
 		(order_uid, order_data)
@@ -56,24 +55,20 @@ func (s *PostgresStorage) CreateOrder(ctx context.Context, order_uid uuid.UUID, 
 	return nil
 }
 
-func (s *PostgresStorage) GetOrder(ctx context.Context, uuid uuid.UUID) (*model.Order, error) {
+func (s *PostgresStorage) GetOrder(ctx context.Context, order_uid string) (*model.Order, error) {
 	query := `
 		SELECT order_data
 		FROM orders
 		WHERE order_uid = $1
 	`
-	row := s.db.QueryRowContext(ctx, query, uuid)
-
-	if err := row.Err(); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, storage.ErrOrderNotFound
-		}
-		return nil, err
-	}
+	row := s.db.QueryRowContext(ctx, query, order_uid)
 
 	var orderData []byte
 	err := row.Scan(&orderData)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, storage.ErrOrderNotFound
+		}
 		return nil, err
 	}
 
@@ -86,12 +81,12 @@ func (s *PostgresStorage) GetOrder(ctx context.Context, uuid uuid.UUID) (*model.
 
 }
 
-func (s *PostgresStorage) DeleteOrder(ctx context.Context, uuid uuid.UUID) error {
+func (s *PostgresStorage) DeleteOrder(ctx context.Context, order_uid string) error {
 	query := `
 		DELETE FROM orders
 		WHERE order_uid = $1
 	`
-	res, err := s.db.ExecContext(ctx, query, uuid)
+	res, err := s.db.ExecContext(ctx, query, order_uid)
 
 	if err != nil {
 		return err

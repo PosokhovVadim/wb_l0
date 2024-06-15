@@ -79,9 +79,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/order/{uuid}": {
+        "/order/{uid}": {
             "get": {
-                "description": "Get details of an order by its UUID",
+                "description": "Get details of an order by its UID",
                 "consumes": [
                     "application/json"
                 ],
@@ -91,12 +91,12 @@ const docTemplate = `{
                 "tags": [
                     "order"
                 ],
-                "summary": "Get an order by UUID",
+                "summary": "Get an order by UID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Order UUID",
-                        "name": "uuid",
+                        "description": "Order UID",
+                        "name": "uid",
                         "in": "path",
                         "required": true
                     }
@@ -183,7 +183,6 @@ const docTemplate = `{
                 "order_uid",
                 "payment",
                 "shardkey",
-                "sm_id",
                 "track_number"
             ],
             "properties": {
@@ -238,15 +237,9 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "brand",
-                "chrt_id",
                 "name",
-                "nm_id",
-                "price",
                 "rid",
-                "sale",
                 "size",
-                "status",
-                "total_price",
                 "track_number"
             ],
             "properties": {
@@ -288,13 +281,8 @@ const docTemplate = `{
         "model.Payment": {
             "type": "object",
             "required": [
-                "amount",
                 "bank",
                 "currency",
-                "custom_fee",
-                "delivery_cost",
-                "goods_total",
-                "payment_dt",
                 "provider",
                 "transaction"
             ],

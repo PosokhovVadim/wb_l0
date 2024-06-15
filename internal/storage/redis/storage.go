@@ -7,7 +7,6 @@ import (
 	"order/internal/storage"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
 )
 
 type RedisStorage struct {
@@ -19,19 +18,24 @@ func NewRedisStorage(redisPath string) (*RedisStorage, error) {
 		Addr: redisPath,
 		DB:   0,
 	})
+
+	_, err := client.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, err
+	}
+
 	return &RedisStorage{
 		client: client,
 	}, nil
 }
 
-func (s *RedisStorage) CreateOrder(ctx context.Context, order_uid uuid.UUID, order model.Order) error {
+func (s *RedisStorage) CreateOrder(ctx context.Context, order_uid string, order model.Order) error {
 	orderJSON, err := json.Marshal(order)
 	if err != nil {
 		return err
 	}
 
-	key := order_uid.String()
-	err = s.client.Set(ctx, key, orderJSON, 0).Err()
+	err = s.client.Set(ctx, order_uid, orderJSON, 0).Err()
 	if err != nil {
 		return err
 	}
@@ -39,9 +43,8 @@ func (s *RedisStorage) CreateOrder(ctx context.Context, order_uid uuid.UUID, ord
 	return nil
 }
 
-func (s *RedisStorage) GetOrder(ctx context.Context, uuid uuid.UUID) (*model.Order, error) {
-	key := uuid.String()
-	orderJSON, err := s.client.Get(ctx, key).Result()
+func (s *RedisStorage) GetOrder(ctx context.Context, order_uid string) (*model.Order, error) {
+	orderJSON, err := s.client.Get(ctx, order_uid).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, storage.ErrOrderNotFound
@@ -58,9 +61,8 @@ func (s *RedisStorage) GetOrder(ctx context.Context, uuid uuid.UUID) (*model.Ord
 	return &order, nil
 }
 
-func (s *RedisStorage) DeleteOrder(ctx context.Context, uuid uuid.UUID) error {
-	key := uuid.String()
-	err := s.client.Del(ctx, key).Err()
+func (s *RedisStorage) DeleteOrder(ctx context.Context, order_uid string) error {
+	err := s.client.Del(ctx, order_uid).Err()
 	if err != nil {
 		if err == redis.Nil {
 			return storage.ErrOrderNotFound

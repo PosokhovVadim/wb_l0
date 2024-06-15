@@ -10,7 +10,6 @@ import (
 	_ "order/docs"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type OrderHandlers struct {
@@ -72,22 +71,22 @@ func (h *OrderHandlers) CreateOrder(c *fiber.Ctx) error {
 }
 
 // GetOrder godoc
-// @Summary Get an order by UUID
-// @Description Get details of an order by its UUID
+// @Summary Get an order by UID
+// @Description Get details of an order by its UID
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param uuid path string true "Order UUID"
+// @Param uid path string true "Order UID"
 // @Success 200 {object} model.Order
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /order/{uuid} [get]
+// @Router /order/{uid} [get]
 func (h *OrderHandlers) GetOrder(c *fiber.Ctx) error {
-	orderUID, err := uuid.Parse(c.Params("uuid"))
-	if err != nil {
+	orderUID := c.Params("uid")
+	if orderUID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid UUID",
+			"error": "invalid UID",
 		})
 	}
 
