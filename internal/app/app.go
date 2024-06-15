@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"order/internal/handlers"
+	"order/internal/service"
 	"order/internal/storage/postgresql"
 	"order/internal/storage/redis"
 	"order/pkg/logger"
@@ -23,18 +24,18 @@ func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string) *
 	if err != nil {
 		log.Error("Failed to init storage:", logger.Err(err))
 	}
-	_ = psStorage
 
 	redisStorage, err := redis.NewRedisStorage(redisPath)
 	if err != nil {
 		log.Error("Failed to init storage:", logger.Err(err))
 	}
-	_ = redisStorage
 
-	// init service layer
+	orderService := service.NewOrderService(log, *psStorage, *redisStorage)
+	orderCtrl := handlers.NewOrderHandlers(log, orderService)
+
 	fiberApp := handlers.SetupFiber()
 
-	handlers.SetupRoutes(fiberApp, nil)
+	handlers.SetupRoutes(fiberApp, orderCtrl)
 
 	return &App{
 		log:   log,

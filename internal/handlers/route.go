@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	swagger "github.com/gofiber/swagger"
 )
 
 func SetupFiber() *fiber.App {
@@ -18,5 +19,7 @@ func SetupFiber() *fiber.App {
 }
 
 func SetupRoutes(app *fiber.App, orderCtrl *OrderHandlers) {
-	app.Get("/order:id", orderCtrl.GetOrder)
+	app.Get("/swagger/*", swagger.HandlerDefault)
+	app.Get("api/v1/order:uuid", orderCtrl.GetOrder)
+	app.Post("api/v1/order", orderCtrl.CreateOrder)
 }
