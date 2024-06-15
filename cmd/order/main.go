@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	_ "order/docs"
 	"order/internal/app"
 	"order/internal/config"
 	"order/pkg/logger"
 	"os"
-	_ "order/docs"
+
 	"github.com/joho/godotenv"
 )
 
@@ -29,7 +31,26 @@ func run() error {
 		return err
 	}
 
-	orderApp := app.NewApp(log, cfg.HTTPServer.Port, cfg.StoragePath, cfg.RedisPath)
+	orderApp, err := app.NewApp(log, cfg.HTTPServer.Port, cfg.StoragePath, cfg.RedisPath)
+	if err != nil {
+		log.Error("Failed to init app:", logger.Err(err))
+		return err
+	}
+	errChan := make(chan error)
+
+	go func() {
+		if err := orderApp.SyncData(context.Background()); err != nil {
+			errChan <- err
+		}
+	}()
+
+	select {
+	case err := <-errChan:
+		log.Error("Failed to sync data:", logger.Err(err))
+		return err
+	default:
+		log.Info("Data synced successfully")
+	}
 
 	if err := orderApp.Run(); err != nil {
 		log.Error("Failed to run app:", logger.Err(err))

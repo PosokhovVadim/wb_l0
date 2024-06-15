@@ -81,6 +81,35 @@ func (s *PostgresStorage) GetOrder(ctx context.Context, order_uid string) (*mode
 
 }
 
+func (s *PostgresStorage) GetAllOrders(ctx context.Context) ([]model.Order, error) {
+	query := `
+		SELECT order_data
+		FROM orders
+	`
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []model.Order
+	for rows.Next() {
+		var orderData []byte
+		err = rows.Scan(&orderData)
+		if err != nil {
+			return nil, storage.ErrOrderNotFound
+		}
+		var order model.Order
+		err = json.Unmarshal(orderData, &order)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
 func (s *PostgresStorage) DeleteOrder(ctx context.Context, order_uid string) error {
 	query := `
 		DELETE FROM orders

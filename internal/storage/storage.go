@@ -12,6 +12,7 @@ type OrderStorage interface {
 	CreateOrder(ctx context.Context, order_uid uuid.UUID, order model.Order) error
 	GetOrder(ctx context.Context, uuid uuid.UUID) (*model.Order, error)
 	DeleteOrder(ctx context.Context, uuid uuid.UUID) error
+	GetAllOrders(ctx context.Context) ([]model.Order, error)
 }
 
 var (

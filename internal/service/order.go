@@ -21,6 +21,7 @@ type Order interface {
 	CreateOrder(ctx context.Context, data []byte) error
 	GetOrder(ctx context.Context, order_uid string) (*model.Order, error)
 	DeleteOrder(ctx context.Context, order_uid string) error
+	SyncData(ctx context.Context) error
 }
 
 type OrderService struct {
@@ -90,5 +91,22 @@ func (s *OrderService) GetOrder(ctx context.Context, orderUID string) (*model.Or
 }
 
 func (s *OrderService) DeleteOrder(ctx context.Context, order_uid string) error {
+	return nil
+}
+
+func (s *OrderService) SyncData(ctx context.Context) error {
+	orders, err := s.storage.GetAllOrders(ctx)
+
+	if err != nil {
+		s.log.Error("Failed to get orders from storage:", logger.Err(err))
+		return err
+	}
+
+	for _, order := range orders {
+		if err := s.cache.CreateOrder(ctx, order.OrderUID, order); err != nil {
+			s.log.Error("Failed to create order in cache:", logger.Err(err))
+			return err
+		}
+	}
 	return nil
 }

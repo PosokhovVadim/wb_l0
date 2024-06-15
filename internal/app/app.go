@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"order/internal/handlers"
@@ -13,24 +14,28 @@ import (
 )
 
 type App struct {
-	log   *slog.Logger
-	fiber *fiber.App
-	port  int
+	log     *slog.Logger
+	fiber   *fiber.App
+	port    int
+	service service.Order
 }
 
-func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string) *App {
+func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string) (*App, error) {
 
 	psStorage, err := postgresql.NewPostgresStorage(postgresPath)
 	if err != nil {
 		log.Error("Failed to init storage:", logger.Err(err))
+		return nil, err
 	}
 
 	redisStorage, err := redis.NewRedisStorage(redisPath)
 	if err != nil {
 		log.Error("Failed to init storage:", logger.Err(err))
+		return nil, err
 	}
 
 	orderService := service.NewOrderService(log, *psStorage, *redisStorage)
+
 	orderCtrl := handlers.NewOrderHandlers(log, orderService)
 
 	fiberApp := handlers.SetupFiber()
@@ -38,10 +43,19 @@ func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string) *
 	handlers.SetupRoutes(fiberApp, orderCtrl)
 
 	return &App{
-		log:   log,
-		fiber: fiberApp,
-		port:  port,
+		log:     log,
+		fiber:   fiberApp,
+		port:    port,
+		service: orderService,
+	}, nil
+}
+
+func (a *App) SyncData(ctx context.Context) error {
+	if err := a.service.SyncData(ctx); err != nil {
+		a.log.Error("Failed to sync data:", logger.Err(err))
+		return err
 	}
+	return nil
 }
 
 func (a *App) Run() error {
