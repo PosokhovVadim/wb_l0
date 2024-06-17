@@ -33,10 +33,14 @@ type OrderService struct {
 
 func NewOrderService(log *slog.Logger, storage postgresql.PostgresStorage, cache redis.RedisStorage) *OrderService {
 	var validate = validator.New()
-	validate.RegisterValidation("checkint", func(fl validator.FieldLevel) bool {
+	err := validate.RegisterValidation("checkint", func(fl validator.FieldLevel) bool {
 		value := fl.Field().Int()
 		return value >= 0
 	})
+
+	if err != nil {
+		log.Error("Failed to register integer validation:", logger.Err(err))
+	}
 
 	return &OrderService{
 		log:       log,
@@ -69,6 +73,7 @@ func (s *OrderService) CreateOrder(ctx context.Context, data []byte) error {
 		return err
 	}
 
+	s.log.Info("Order created:", slog.String("order_uid", order.OrderUID))
 	return nil
 }
 

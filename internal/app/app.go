@@ -8,6 +8,7 @@ import (
 	"order/internal/service"
 	"order/internal/storage/postgresql"
 	"order/internal/storage/redis"
+	nats "order/internal/sub"
 	"order/pkg/logger"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,7 @@ type App struct {
 	service service.Order
 }
 
-func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string) (*App, error) {
+func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string, natsURL string) (*App, error) {
 
 	psStorage, err := postgresql.NewPostgresStorage(postgresPath)
 	if err != nil {
@@ -35,6 +36,12 @@ func NewApp(log *slog.Logger, port int, postgresPath string, redisPath string) (
 	}
 
 	orderService := service.NewOrderService(log, *psStorage, *redisStorage)
+
+	nats := nats.NewNatsSub(log, orderService)
+
+	go func() {
+		_ = nats.NatsConnect(natsURL)
+	}()
 
 	orderCtrl := handlers.NewOrderHandlers(log, orderService)
 
