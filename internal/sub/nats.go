@@ -35,14 +35,24 @@ func (n *NatsSub) NatsConnect(url string) error {
 		n.log.Error("Failed to connect to NATS:", slog.String("url", url), logger.Err(err))
 		return err
 	}
-	defer sc.Close()
+	defer func() {
+		err = sc.Close()
+		if err != nil {
+			n.log.Error("Failed to close NATS:", slog.String("url", url), logger.Err(err))
+		}
+	}()
 
 	sub, err := sc.Subscribe("order_create", n.MessageHandler)
 	if err != nil {
 		n.log.Error("Failed to subscribe to NATS:", slog.String("url", url), logger.Err(err))
 		return err
 	}
-	defer sub.Unsubscribe()
+	defer func() {
+		err = sub.Unsubscribe()
+		if err != nil {
+			n.log.Error("Failed to unsubscribe from NATS:", slog.String("url", url), logger.Err(err))
+		}
+	}()
 
 	select {}
 
