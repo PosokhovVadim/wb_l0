@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
@@ -47,11 +46,12 @@ func run() error {
 			log.Fatalf("Error marshalling JSON: %v", err)
 			continue
 		}
-		fmt.Println(string(bytes))
 		err = sc.Publish(subject, bytes)
 		if err != nil {
 			log.Fatalf("Error publishing message: %v", err)
 		}
+
+		log.Printf("Published [%s] : '%s'\n", subject, string(bytes))
 	}
 
 	log.Println("All Messages published")
@@ -71,9 +71,9 @@ func main() {
 
 1: Валидный заказ
 2: Тот же самый заказ
-3: Полностью невалдиный заказ
+3: Полностью невалидный заказ
 4: Заказ с отрицательным  payment_dt
 5: Заказ с неверной датой
 6 и 7: Валидные заказы
-8: отстуствет одно поле (oof_shard)
+8: Отсутствует одно поле (oof_shard)
 */
