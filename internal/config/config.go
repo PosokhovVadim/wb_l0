@@ -12,6 +12,7 @@ type Config struct {
 	Env         string     `yaml:"env" env-required:"true"`
 	StoragePath string     `yaml:"storage_path" env-required:"true"`
 	RedisPath   string     `yaml:"redis_path" env-required:"true"`
+	NatsUrl     string     `yaml:"nats_url" env-required:"true"`
 	HTTPServer  HTTPServer `yaml:"http_server"`
 }
 

@@ -31,7 +31,7 @@ func run() error {
 		return err
 	}
 
-	orderApp, err := app.NewApp(log, cfg.HTTPServer.Port, cfg.StoragePath, cfg.RedisPath)
+	orderApp, err := app.NewApp(log, cfg.HTTPServer.Port, cfg.StoragePath, cfg.RedisPath, cfg.NatsUrl)
 	if err != nil {
 		log.Error("Failed to init app:", logger.Err(err))
 		return err

@@ -2,6 +2,7 @@ service_name: "order"
 env: "local"
 storage_path: "postgres://postgres:postgres@db:5432/wb_db?sslmode=disable"
 redis_path: "redis:6379"
+nats_url: "nats://nats:4222"
 http_server: 
   port: 8080
   timeout: 5s
