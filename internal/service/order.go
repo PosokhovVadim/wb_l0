@@ -73,6 +73,7 @@ func (s *OrderService) CreateOrder(ctx context.Context, data []byte) error {
 		return err
 	}
 
+	s.log.Info("Order created:", slog.String("order_uid", order.OrderUID))
 	return nil
 }
 

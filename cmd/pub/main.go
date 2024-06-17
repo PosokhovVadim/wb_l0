@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -31,7 +32,7 @@ func run() error {
 	}
 	defer sc.Close()
 
-	jsonData := readJSON("orders.json")
+	jsonData := readJSON("cmd/pub/orders.json")
 
 	var orders []map[string]interface{}
 
@@ -46,7 +47,7 @@ func run() error {
 			log.Fatalf("Error marshalling JSON: %v", err)
 			continue
 		}
-
+		fmt.Println(string(bytes))
 		err = sc.Publish(subject, bytes)
 		if err != nil {
 			log.Fatalf("Error publishing message: %v", err)
